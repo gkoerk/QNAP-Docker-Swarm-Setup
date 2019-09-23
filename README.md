@@ -1,6 +1,6 @@
 # QNAP-Docker-Swarm-Setup
 A guide for configuring the docker swarm stack on QNAP devices with Container Station
-###  Docker Swarm Setup 
+###  Docker Swarm Setup
 #### Preparation
 - Ports 80 and 443 must be unused on your NAS. By default, QTS assigns both ports to the Web Server application. Please change this (in QNAP GUI Settings, Applications, Web Server) to 9080 and 9443 to ensure no port conflicts with docker stacks. You should consider disabling both the Web Server and MySQL applications in the QNAP GUI Settings.
 - Ports 80 and 443 must be forwarded from your router to your NAS. This is *possible* using UPNP in the QNAP GUI, but **this is not recommended. Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
@@ -22,7 +22,7 @@ Steps:
 
 6. Create a new user called _dockeruser_
 
-7. Create the following folder shares and give _dockeruser_ Read/Write permissions:  
+7. Create the following folder shares and give _dockeruser_ Read/Write permissions:
    - `/share/appdata` - Here we will add a folder <stack name>. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>/AppData` in Windows.
    - `/share/appdata/config` - Here we will also add a folder <stack name>. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
    - `/share/runtime` - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
@@ -35,7 +35,7 @@ Steps:
 
 11. Run `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
 
-12. **Checkpoint:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`? 
+12. **Checkpoint:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`?
 The networks should match the following (except the generated NETWORK ID):
 
 ```[~] # docker network ls
@@ -47,13 +47,13 @@ kr4kpxr5a72x        ingress                overlay             swarm
 a0982a1fc7f6        none                   null                local
 ```
 
-**Important: If your configuration is lacking a docker_gwbridge or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault. 
+**Important: If your configuration is lacking a docker_gwbridge or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault.
 
-13. Install the `entware-std` package from the third-party QNAP Club repository. This is necessary in order to setup the shortcuts/aliases in Steps 18 & 19 by editing a permanent profile. 
+13. Install the `entware-std` package from the third-party QNAP Club repository. This is necessary in order to setup the shortcuts/aliases in Steps 18 & 19 by editing a permanent profile.
     - The preferred way to do this is to add the QNAP Club Repository to the App Center. Follow the [walkthrough instructions here](https://www.qnapclub.eu/en/howto/1). Note that I use the English translation of the QNAP Club website, but you may change languages (and urls) in the upper right language dropdown.
     - If you don't need the walkthrough, add the repository. (For English, go to App Center, Settings, App Repository, Add, `https://www.qnapclub.eu/en/repo.xml`).
     - If you have trouble locating the correct package below, the correct description begins `entware-3x and entware-ng merged to become entware.` The working link (as of publication) is here: https://www.qnapclub.eu/en/qpkg/556. If you **cannot** add the QNAP Club store to the App Center, you may manually download the qpkg file from that link and use it to install manually via the App Center, "Install Manually" button. This is **not preferred** as QNAP cannot check for and notify you of updates to the package.
-    - Search for `entware-std` and install that package. 
+    - Search for `entware-std` and install that package.
 
 **Important: DO NOT CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.**
 
@@ -103,7 +103,7 @@ dss() {
 	bash /share/appdata/scripts/setup_stack.sh
 }
 ```
-     
+
 Remember these shortcut names:
 - **dsd** deploys a single stack - e.g. `dsd traefik`
 - **dsr** removes a single stack - e.g. `dsr traefik`
@@ -120,6 +120,8 @@ Remember these shortcut names:
 ** See below for scripts that need to be created and added to `/share/appdata/scripts` folder
 
 ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
+
+***NOTE:*** If you use a Windows client to save the profile (or the scripts), they will be saved with CR LF and will error.  Please set the file format to UNIX (LF) in order for the profile and scripts to work correctly.
 
 20. Edit _traefik.env_ and put your cloudflare email and GLOBAL API KEY in lines 7&8 (If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.env_ file)
 21. Edit _traefik.yml_ and _traefik.toml_ to include your domain name
@@ -158,6 +160,8 @@ Remember these shortcut names:
 ### Scripts Setup
 Please create these scripts and save them to `/share/appdata/scripts` if you want to use the cli shortcuts we created in earlier steps.  **NOTE:** `setup_stack.sh` requires you to add your NAS IP for it to work.
 All the stack scripts (`xxx_stack.sh`) require you to edit the stacks list to match your setup.  If you do not edit them they will fail to deploy the stacks you don't have .. nothing blows up, no bunnies die, just a big pile of nothingness in your swarm.
+***NOTE:*** Please ensure you save these files in UNIX (LF) format.  Windows (CR LF) format will break these scripts.  If you are a Windows user, please download the files in the scripts folder above.
+
 ##### folder_setup.sh
 
 ```
@@ -194,7 +198,7 @@ echo " - $@"
 
 ```
 
-##### restart_stack.sh 
+##### restart_stack.sh
 
 ```
 #!/bin/bash
