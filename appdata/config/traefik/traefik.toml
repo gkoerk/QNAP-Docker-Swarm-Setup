@@ -1,0 +1,114 @@
+defaultEntryPoints = ["http", "https"]
+InsecureSkipVerify = true
+
+logLevel = "INFO"
+
+# Set to log to file rather than (default STDOUT). Comment out to send to Graylog.
+[traefikLog]
+  filePath = "/etc/traefik/traefik.log"
+
+[accessLog]
+  filePath = "/etc/traefik/access.log"
+
+#  [accessLog.filters]
+#    statusCodes = ["200", "300-302"]
+#    retryAttempts = true
+#    minDuration = "10ms"
+
+[entryPoints]
+  [entryPoints.http]
+   address = ":80"
+    [entryPoints.http.forwardedHeaders]
+      trustedIPs = ["172.0.0.1/8"]
+    # Keep the below 2 lines commented out if you use Cloudflare DNS as it causes
+    # an endless loop of redirects.
+    # [entryPoints.http.redirect]
+    #   entryPoint = "https"
+ [entryPoints.https]
+  address = ":443"
+  [entryPoints.https.tls]
+#    [[entryPoints.https.tls.certificates]]
+#	  certFile = "/etc/traefik/ssl/example.crt"
+#	  keyFile = "/etc/traefik/ssl/example.key"
+
+
+[retry]
+
+[api]
+  entrypoint = "traefik"
+  dashboard = true
+
+[docker]
+  endpoint = "tcp://127.0.0.1:2375"
+  domain = "<yourdomainhere>"
+  watch = true
+  exposedbydefault = false
+  #swarmmode = true
+
+[acme]
+  email = "<youremailhere>"
+  storage = "/etc/traefik/acme.json"
+  entryPoint = "https"
+  acmeLogging = true
+  onHostRule = true
+  #onDemand = true
+  caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  [acme.httpChallenge]
+  entryPoint = "http"
+
+[acme.dnsChallenge]
+  provider = "cloudflare" <change if you do not use cloudflare for DNS>
+#  delayBeforeCheck = 5
+  resolvers = ["1.1.1.1:53", "1.0.0.1:53"]
+
+[[acme.domains]]
+  main = "*.<yourdomainhere>"
+  sans = ["<yourdomainhere>"]
+
+[file]
+  watch=true
+
+[frontends]
+
+  [frontends.pihole]
+    backend="pihole"
+    passHostHeader = true
+
+	[frontends.pihole.routes.1]
+	  rule = "Host:pihole.<yourdomainhere>; AddPrefix: /admin"
+
+  [frontends.unifi]
+    backend="unifi"
+    passHostHeader = true
+
+	[frontends.unifi.routes.1]
+	  rule = "Host:unifi.<yourdomainhere>"
+	  port = 8443
+	  protocol = "https"
+
+  [frontends.transmission]
+    backend="transmission"
+    passHostHeader = true
+
+	[frontends.transmission.routes.1]
+	  rule = "Host:transmission.<yourdomainhere>"
+
+
+[backends]
+
+  [backends.pihole]
+    [backends.pihole.servers.pihole]
+	  url = "http://<piholeIPhere>:80"
+	  weight = 1
+
+  [backends.unifi]
+    [backends.unifi.servers.unifi]
+	  url = "https://<unifiIPhere>:8443"
+	  weight = 1
+	certFile = "/etc/traefik/ssl/example.crt"
+	keyFile = "/etc/traefik/ssl/example.key"
+
+  [backends.transmission]
+    [backends.transmission.servers.transmission]
+	  url = "http://<transmissionIPhere>:9091"
+	  weight = 1
