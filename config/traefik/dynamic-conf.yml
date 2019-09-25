@@ -1,0 +1,85 @@
+http:
+  routers:
+    https-redirect:
+      entryPoints:
+        - http
+      middlewares:
+        - https-redirect
+      service: redirect
+      rule: "HostRegexp(`{host:[a-z-.]+}`)"
+
+    gkoerk:
+      entryPoints:
+        - https
+      middlewares:
+        - "forward-auth"
+      service: noop
+      rule: Host(`gkoerk.com`)
+      tls:
+        certResolver: namecheap
+        domains:
+          - main: "*.gkoerk.com"
+            sans:
+              - gkoerk.com
+
+    qnapunofficial:
+      entryPoints:
+        - https
+      middlewares:
+        - "forward-auth"
+      service: noop
+      rule: Host(`qnapunofficial.com`)
+      tls:
+        certResolver: namecheap
+        domains:
+          - main: "*.qnapunofficial.com"
+            sans:
+              - qnapunofficial.com
+
+    oracleoptimizer:
+      entryPoints:
+        - https
+      middlewares:
+        - "forward-auth"
+      service: noop
+      rule: Host(`oracleoptimizer.com`)
+      tls:
+        certResolver: namecheap
+        domains:
+          - main: "*.oracleoptimizer.com"
+            sans:
+              - oracleoptimizer.com
+
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
+
+    compress:
+      compress: {}
+
+    forward-auth:
+      forwardAuth:
+        address: "http://192.168.200.20:8080/authorize"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - X-FORWARDAUTH-NAME
+          - X-FORWARDAUTH-SUB
+          - X-FORWARDAUTH-EMAIL
+
+    basic-user:
+      basicAuth:
+        users:
+          - "admin:<bcrypt password from htpasswd command>"
+
+    secured:
+      chain:
+        middlewares:
+          - https-redirect
+          - forward-auth
+
+  services:
+    noop:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1"
