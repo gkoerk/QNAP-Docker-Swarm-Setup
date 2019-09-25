@@ -1,0 +1,66 @@
+global:
+  checkNewVersion: true
+
+serversTransport:
+  insecureSkipVerify: true
+
+entryPoints:
+  http:
+    address: ":80"
+    forwardedHeaders:
+      trustedIPs:
+        - "172.0.0.1/8"
+        - "10.0.0.1/8"
+  https:
+    address: ":443"
+
+providers:
+  docker:
+    watch: true
+    endpoint: "unix:///var/run/docker.sock"
+    defaultRule: "Host(`{{ .Name }}.gkoerk.com`)"
+    exposedByDefault: false
+    swarmMode: true
+    network: "traefik_public"
+  file:
+    filename: filename = "/etc/traefik/dynamic-conf.toml"
+    watch: true
+
+api:
+  insecure: true
+  dashboard: true
+  debug: true
+
+metrics:
+  prometheus:
+    buckets:
+    - 0.1
+    - 0.3
+    - 1.2
+    - 5.0
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    entryPoint: metrics
+
+ping:
+  entryPoint: ping
+
+log:
+  level: "ERROR"
+  filePath: "/etc/traefik/log/traefik.log"
+
+accessLog:
+  filePath: "/etc/traefik/log/traefik_access.log"
+
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: "gkoerk@gmail.com"
+      # caserver: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      storage: "/etc/traefik/acme.json"
+      dnsChallenge:
+        provider: "namecheap"
+        delayBeforeCheck: 0
+        resolvers:
+          - 1.1.1.1:53
+          - 8.8.8.8:53
