@@ -114,25 +114,46 @@ XXXXXXXXXXXX        none                   null                local
 19.  Add the following lines to the end of the file and save
 
 ```
-dsd() {
-	docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
+dsd(){
+  if [[ $1 = "-default" ]]; then
+      list=( traefik portainer docker-cleanup ouroboros nextcloud privatebin ); 
+    else
+      list="$@"
+  fi
+  for i in "${list[@]}"; do
+    docker stack deploy "$i" -c /share/appdata/config/"$i"/"$i".yml
+  done
+  unset list IFS
 }
-dsr() {
-	docker stack rm "$1"
+dsr(){
+  if [[ $1 = "-all" ]]; then
+      IFS=$'\n'; 
+      list=( $(docker stack ls --format {{.Name}}) ); 
+    else
+      list="$@"
+  fi
+  for i in "${list[@]}"; do
+    docker stack rm "$i"
+  done
+  unset list IFS
 }
 bounce(){
- limit=15
- docker stack rm "$1"
-  until [ -z "$(docker service ls --filter label=com.docker.stack.namespace=$1 -q)" ] || [ "$limit" -lt 0 ]; do
-   sleep 1;
-   limit="$((limit-1))"
+  if [[ $1 = "-all" ]]; then
+      IFS=$'\n'; 
+      list=( $(docker stack ls --format {{.Name}}) ); 
+    else
+      list="$@"
+  fi
+  for i in "${list[@]}"; do
+    docker stack rm "$i"
   done
- limit=15  
-  until [ -z "$(docker network ls --filter label=com.docker.stack.namespace=$1 -q)" ] || [ "$limit" -lt 0 ]; do
-   sleep 1;
-   limit="$((limit-1))"
+  for i in "${list[@]}"; do
+    while [ "$(docker service ls --filter label=com.docker.stack.namespace=$i -q)" ] || [ "$(docker network ls --filter label=com.docker.stack.namespace=$i -q)" ]; do sleep 1; done
   done
- docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
+  for i in "${list[@]}"; do
+    docker stack deploy "$i" -c /share/appdata/config/"$i"/"$i".yml
+  done
+  unset list IFS
 }
 dcu(){
  docker-compose -f /share/appdata/config/"$1"/"$1".yml up -d
