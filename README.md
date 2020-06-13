@@ -1,6 +1,3 @@
-
-*** BE WARNED! THIS REPO IS UNDER ACTIVE DEVELOPMENT, AND PROBABLY WON'T WORK AS ANYTHING BUT SNIPPET EXAMPLES! ***
-=======
 <a href="https://liberapay.com/gkoerk/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 
 <img src="http://img.shields.io/liberapay/patrons/gkoerk.svg?logo=liberapay">
