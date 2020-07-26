@@ -1,0 +1,15 @@
+#UPDATED TRAEFIK DYNAMIC FORWARD-AUTH FILE:
+
+# Traefik Dynamic Configuration
+# Middleware: Forward Auth
+# Host Path: /share/appdata/config/traefik/dynamic/forward-auth.yaml
+# Internal Path: /etc/traefik/dynamic/forward-auth.yaml
+
+http:
+  middlewares:
+    forward-auth:
+      forwardAuth:
+        address: "http://traefik-forward-auth:4181"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "X-Forwarded-User"

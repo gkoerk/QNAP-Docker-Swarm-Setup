@@ -1,0 +1,17 @@
+#Substitute this container for the forward-auth in original traefik.yml
+#Source: https://geek-cookbook.funkypenguin.co.nz/ha-docker-swarm/traefik-forward-auth/keycloak/ 
+#Adapted with Traefik 2.0 labels
+
+  traefik-forward-auth:
+    image: funkypenguin/traefik-forward-auth
+    env_file: /share/appdata/config/traefik/traefik-forward-auth.env
+    networks:
+      - traefik_public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.auth.entrypoints=https"
+        - "traefik.http.routers.auth.rule=Host(`auth.gkoerk.com`)"
+        - "traefik.http.routers.auth.tls.certresolver=cloudflare"
+        - "traefik.http.routers.auth.middlewares=forward-auth@file"
+        - "traefik.http.services.auth.loadbalancer.server.port=4181"
